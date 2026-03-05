@@ -1,7 +1,6 @@
 {
   imports = [
     ./aero/services.nix
-    ./davinci.nix
     ./hardware.nix
     ./i18n.nix
     ./network.nix

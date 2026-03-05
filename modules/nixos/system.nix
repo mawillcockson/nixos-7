@@ -15,31 +15,11 @@
       nurl
       unzip
       qbittorrent
-      inputs.agenix.packages.x86_64-linux.default
     ]);
-
-  programs.obs-studio = {
-    enable = true;
-    plugins = with pkgs.obs-studio-plugins; [
-      wlrobs
-      obs-backgroundremoval
-      obs-pipewire-audio-capture
-    ];
-  };
 
   programs.nix-ld.enable = true;
 
-  programs.fish.enable = true;
-
   programs.firefox.enable = true;
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
 
   security.sudo.extraConfig = ''
     Defaults    env_keep+=SSH_AUTH_SOCK
@@ -48,7 +28,6 @@
   nixpkgs.config.allowUnfree = true;
 
   nixpkgs.overlays = [
-    (import ./overlays/amd.nix)
     (import ./overlays/repos.nix {
       inherit inputs;
     })

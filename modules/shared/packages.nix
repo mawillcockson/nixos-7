@@ -2,18 +2,5 @@
 
 with pkgs;
 [
-  vim
-  wget
-  vscode
-  gh
   fastfetch
-  nodejs_22
-  corepack_22
-  prismlauncher
-  discord
-  clang-tools
-  jdk21
-  typst
-  nixfmt
-  nixfmt-tree
 ]

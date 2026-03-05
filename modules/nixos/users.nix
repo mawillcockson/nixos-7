@@ -1,16 +1,11 @@
 { pkgs, ... }:
+let user = "user"; in
 {
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users = {
-    ducanh = {
-      shell = pkgs.fish;
+    "${user}" = {
       isNormalUser = true;
       extraGroups = [
         "wheel"
-        "docker"
-      ]; # Enable ‘sudo’ for the user.
-      packages = with pkgs; [
-        tree
       ];
     };
   };
@@ -19,13 +14,13 @@
     useUserPackages = true;
     backupFileExtension = "backup";
     users = {
-      ducanh = {
+      "${user}" = {
         imports = [
-          ../../home/ducanh.nix
+          ../../home/${user}.nix
           ./aero/home.nix
         ];
         aero.enable = true;
-        home.homeDirectory = "/home/ducanh";
+        home.homeDirectory = "/home/${user}";
       };
     };
   };

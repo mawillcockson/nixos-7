@@ -7,50 +7,48 @@
   pkgs,
   modulesPath,
   ...
-}:
-
-{
+}: {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
   boot.initrd.availableKernelModules = [
-    "nvme"
     "xhci_pci"
-    "ahci"
     "usbhid"
-    "sd_mod"
+    "usb_storage"
   ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = [];
+  boot.extraModulePackages = [];
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/b07cac2a-2f6d-41d1-9d59-8af7d9f58684";
+    device = "/dev/disk/by-uuid/2b2434f5-7c01-475d-9aa7-a82a7ce41913";
     fsType = "btrfs";
-    options = [ "subvol=root" ];
+    options = ["subvol=root"];
+  };
+
+  boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/b5e0991e-2b71-4368-8506-388ea02f86f4";
+
+  fileSystems."/home" = {
+    device = "/dev/disk/by-uuid/2b2434f5-7c01-475d-9aa7-a82a7ce41913";
+    fsType = "btrfs";
+    options = ["subvol=home"];
   };
 
   fileSystems."/nix" = {
-    device = "/dev/disk/by-uuid/b07cac2a-2f6d-41d1-9d59-8af7d9f58684";
+    device = "/dev/disk/by-uuid/2b2434f5-7c01-475d-9aa7-a82a7ce41913";
     fsType = "btrfs";
-    options = [ "subvol=nix" ];
+    options = ["subvol=nix"];
   };
 
   fileSystems."/swap" = {
-    device = "/dev/disk/by-uuid/b07cac2a-2f6d-41d1-9d59-8af7d9f58684";
+    device = "/dev/disk/by-uuid/2b2434f5-7c01-475d-9aa7-a82a7ce41913";
     fsType = "btrfs";
-    options = [ "subvol=swap" ];
+    options = ["subvol=swap"];
   };
 
-  fileSystems."/home" = {
-    device = "/dev/disk/by-uuid/b07cac2a-2f6d-41d1-9d59-8af7d9f58684";
-    fsType = "btrfs";
-    options = [ "subvol=home" ];
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/ACF3-4808";
+  fileSystems."/efi" = {
+    device = "/dev/disk/by-uuid/2665-CDBE";
     fsType = "vfat";
     options = [
       "fmask=0022"
@@ -58,14 +56,29 @@
     ];
   };
 
-  swapDevices = [ ];
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/A6F8-3115";
+    fsType = "vfat";
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+    ];
+  };
+
+  swapDevices = [
+    {
+      device = "/swap/swapfile";
+      size = 4096;
+    }
+  ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.enp8s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp103s0f3u1u1.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp3s0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

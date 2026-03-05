@@ -5,20 +5,8 @@
     # Here, `inputs.nixpkgs` of is kept consistent with the
     # `inputs.nixpkgs` of the current flake,
     # to avoid problems caused by different versions of nixpkgs.
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     home-manager = {
       url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote/v1.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agenix = {
-      url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     plasma-manager = {
@@ -26,94 +14,64 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-    secrets = {
-      url = "git+ssh://git@github.com/DuCanhGH/nix-secrets.git";
-      flake = false;
-    };
     aerothemeplasma = {
-      url = "git+ssh://git@github.com/rustussy/aerothemeplasma";
+      url = "github:rustussy/aerothemeplasma";
       flake = false;
     };
     aero-libplasma = {
-      url = "git+ssh://git@github.com/rustussy/aeroshell-libplasma";
+      url = "github:rustussy/aeroshell-libplasma";
       flake = false;
     };
     aero-workspace = {
-      url = "git+ssh://git@github.com/rustussy/aeroshell-workspace";
+      url = "github:rustussy/aeroshell-workspace";
       flake = false;
     };
     aero-kwin = {
-      url = "git+ssh://git@github.com/rustussy/aeroshell-kwin-components";
+      url = "github:rustussy/aeroshell-kwin-components";
       flake = false;
     };
     aero-smod = {
-      url = "git+ssh://git@github.com/rustussy/aeroshell-smod";
+      url = "github:rustussy/aeroshell-smod";
       flake = false;
     };
     uac-polkit-agent = {
-      url = "git+ssh://git@github.com/rustussy/uac-polkit-agent";
+      url = "github:rustussy/uac-polkit-agent";
       flake = false;
     };
     plymouth-vista = {
-      url = "git+ssh://git@github.com/rustussy/plymouth-vista";
+      url = "github:rustussy/plymouth-vista";
       flake = false;
     };
   };
-  outputs =
-    inputs@{
-      nixpkgs,
-      nix-darwin,
-      home-manager,
-      lanzaboote,
-      agenix,
-      plasma-manager,
-      ...
-    }:
-    let
-      specialArgs = { inherit inputs; };
-      homeManagerOptions = {
-        home-manager.extraSpecialArgs = specialArgs;
-        home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
-      };
-    in
-    {
-      darwinConfigurations.duckintosh = nix-darwin.lib.darwinSystem {
-        system = "aarch64-darwin";
-        inherit specialArgs;
-        modules = [
-          home-manager.darwinModules.home-manager
-          ./systems/duckintosh/configuration.nix
-          { home-manager.extraSpecialArgs = specialArgs; }
-        ];
-      };
-      nixosConfigurations.arkhe = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        inherit specialArgs;
-        modules = [
-          home-manager.nixosModules.home-manager
-          lanzaboote.nixosModules.lanzaboote
-          ./systems/arkhe/configuration.nix
-          homeManagerOptions
-        ];
-      };
-      nixosConfigurations.pneuma = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        inherit specialArgs;
-        modules = [
-          home-manager.nixosModules.home-manager
-          lanzaboote.nixosModules.lanzaboote
-          ./systems/pneuma/configuration.nix
-          homeManagerOptions
-        ];
-      };
-      nixosConfigurations.ousia = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        inherit specialArgs;
-        modules = [
-          home-manager.nixosModules.home-manager
-          ./systems/ousia/configuration.nix
-          homeManagerOptions
-        ];
-      };
+  outputs = inputs @ {
+    nixpkgs,
+    home-manager,
+    plasma-manager,
+    ...
+  }: let
+    specialArgs = {inherit inputs;};
+    homeManagerOptions = {
+      home-manager.extraSpecialArgs = specialArgs;
+      home-manager.sharedModules = [plasma-manager.homeModules.plasma-manager];
     };
+  in {
+    nixosConfigurations.nixos-7 = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      inherit specialArgs;
+      modules = [
+        home-manager.nixosModules.home-manager
+        ./systems/nixos-7/configuration.nix
+        homeManagerOptions
+      ];
+    };
+    devShells.x86_64-linux.default = nixpkgs.devShells.x86_64-linux.default.overrideAttrs (
+      _: previousAttrs: {
+        nativeBuildInputs =
+          previousAttrs.nativeBuildInputs
+          ++ [
+            nixpkgs.legacyPackages.x86_64-linux.nixos-rebuild
+          ];
+      }
+    );
+  };
 }

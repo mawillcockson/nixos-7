@@ -15,17 +15,6 @@
 
     # Enable the X11 windowing system.
     services.xserver.enable = true;
-    services.xserver.videoDrivers = [
-      "nvidia"
-    ]
-    ++ (lib.optionals config.services.amdgpu.enable [ "amdgpu" ]);
-
-    boot = {
-      initrd.kernelModules = if config.services.amdgpu.enable then [ "amdgpu" ] else [ "nvidia" ];
-      extraModulePackages = lib.optionals (!config.services.amdgpu.enable) [
-        config.boot.kernelPackages.nvidia_x11_beta
-      ];
-    };
 
     # Enable the GNOME Desktop Environment.
     # services.displayManager.gdm.enable = true;
@@ -60,34 +49,10 @@
       pulse.enable = true;
     };
 
-    services.btrfs.autoScrub.enable = true;
-    services.btrfs.autoScrub.interval = "weekly";
-    services.btrfs.autoScrub.fileSystems = [ "/" ];
-
     # Enable touchpad support (enabled default in most desktopManager).
     # services.libinput.enable = true;
 
-    services.cloudflare-warp.enable = true;
-
-    services.postgresql = {
-      enable = true;
-      ensureDatabases = [ "blisk" ];
-      authentication = pkgs.lib.mkOverride 10 ''
-        #type database  DBuser  auth-method
-        local all       all     trust
-      '';
-    };
-
     # Enable the OpenSSH daemon.
     services.openssh.enable = true;
-
-    hardware.nvidia = lib.mkIf config.services.amdgpu.enable {
-      powerManagement.enable = true;
-      powerManagement.finegrained = true;
-      prime = {
-        offload.enable = true;
-        offload.enableOffloadCmd = true;
-      };
-    };
   };
 }
